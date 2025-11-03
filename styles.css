@@ -84,7 +84,7 @@ a:hover {
 /* Navigation */
 nav {
     background: var(--white);
-    padding: 0.75rem 0;
+    padding: 0.5rem 0;
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -105,7 +105,7 @@ nav .logo {
 }
 
 nav .logo img {
-    height: 100px;
+    height: 60px;
     width: auto;
     object-fit: contain;
 }
@@ -597,7 +597,7 @@ footer {
     }
 
     nav .logo img {
-        height: 70px;
+        height: 42px;
     }
 
     nav ul {
