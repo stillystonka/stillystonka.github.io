@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Videos - AESOP Afghanistan</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .video-card {
+            background: var(--white);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .video-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .video-embed {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            height: 0;
+            overflow: hidden;
+        }
+
+        .video-embed iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .video-info {
+            padding: 1.5rem;
+        }
+
+        .video-category {
+            display: inline-block;
+            background: var(--light-gray);
+            color: var(--primary-green);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .filter-btn {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--primary-green);
+            background: white;
+            color: var(--primary-green);
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--primary-green);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <a href="index.html" class="logo">
+                <img src="AESOP+Logo+Lockup.webp" alt="AESOP Afghanistan Logo">
+            </a>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="donors.html">For Donors</a></li>
+                <li><a href="students.html">For Students</a></li>
+                <li><a href="volunteers.html">For Volunteers</a></li>
+                <li><a href="student-work.html">Student Work</a></li>
+                <li><a href="videos.html" class="active">Videos</a></li>
+                <li><a href="news-events.html">News & Events</a></li>
+                <li><a href="merch.html">Merch</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>AESOP Videos</h1>
+            <p>Watch stories from our students, teachers, and community</p>
+            <div class="cta-buttons">
+                <a href="#videos" class="btn btn-primary">Watch Videos</a>
+                <a href="#" id="channelLink" class="btn btn-outline" target="_blank">Visit Our YouTube Channel</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filter Buttons -->
+    <section id="videos">
+        <div class="container">
+            <div class="section-header">
+                <h2>Video Gallery</h2>
+                <p>Filter by category to find what interests you</p>
+            </div>
+
+            <div class="filter-buttons">
+                <button class="filter-btn active" onclick="filterVideos('all')">All Videos</button>
+                <button class="filter-btn" onclick="filterVideos('Student Stories')">Student Stories</button>
+                <button class="filter-btn" onclick="filterVideos('Classes')">Classes</button>
+                <button class="filter-btn" onclick="filterVideos('Volunteers')">Volunteers</button>
+            </div>
+
+            <div class="grid grid-2" id="videos-container">
+                <!-- Videos will be loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Video -->
+    <section class="accent-bg">
+        <div class="container">
+            <div class="section-header">
+                <h2>Featured Video</h2>
+                <p>Highlighted content from our community</p>
+            </div>
+            <div style="max-width: 900px; margin: 0 auto;">
+                <div id="featured-video" style="background: rgba(255,255,255,0.1); border-radius: 15px; overflow: hidden;">
+                    <!-- Featured video will load here -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Subscribe CTA -->
+    <section>
+        <div class="container text-center">
+            <h2>Stay Connected</h2>
+            <p style="font-size: 1.3rem; max-width: 700px; margin: 2rem auto;">Subscribe to our YouTube channel for the latest videos featuring student testimonials, class highlights, and volunteer stories.</p>
+            <div class="cta-buttons">
+                <a href="#" id="subscribeLink" class="btn btn-primary" target="_blank">Subscribe on YouTube</a>
+                <a href="index.html" class="btn btn-secondary">Learn More About AESOP</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>About AESOP</h3>
+                    <p>The Afghan Education Student Outreach Project provides free online education to Afghan girls and young women deprived of education.</p>
+                    <p><strong>AESOPAfghanistan.org</strong></p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="donors.html">For Donors</a></li>
+                        <li><a href="students.html">For Students</a></li>
+                        <li><a href="volunteers.html">For Volunteers</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>More</h3>
+                    <ul>
+                        <li><a href="student-work.html">Student Work</a></li>
+                        <li><a href="videos.html">Videos</a></li>
+                        <li><a href="news-events.html">News & Events</a></li>
+                        <li><a href="merch.html">Merch Store</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <p>For inquiries about AESOP:</p>
+                    <p>Visit <strong>AESOPAfghanistan.org</strong></p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 AESOP Afghanistan, Inc. All rights reserved. | Empowering through education.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let allVideos = [];
+        let currentFilter = 'all';
+
+        async function loadVideos() {
+            try {
+                const response = await fetch('data/videos.json');
+                const data = await response.json();
+                allVideos = data.videos;
+
+                // Set YouTube channel links
+                document.getElementById('channelLink').href = data.youtubeChannelUrl;
+                document.getElementById('subscribeLink').href = data.youtubeChannelUrl;
+
+                // Load featured video
+                const featuredVideo = allVideos.find(v => v.featured);
+                if (featuredVideo) {
+                    loadFeaturedVideo(featuredVideo);
+                }
+
+                // Display all videos
+                displayVideos(allVideos);
+            } catch (error) {
+                console.error('Error loading videos:', error);
+            }
+        }
+
+        function loadFeaturedVideo(video) {
+            const container = document.getElementById('featured-video');
+            container.innerHTML = `
+                <div class="video-embed">
+                    <iframe
+                        src="https://www.youtube.com/embed/${video.youtubeId}"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                <div style="padding: 2rem; color: white;">
+                    <h3 style="color: white; margin-bottom: 0.5rem;">${video.title}</h3>
+                    <p style="opacity: 0.9;">${video.description}</p>
+                    <p style="font-size: 0.9rem; opacity: 0.8; margin-top: 1rem;">
+                        ${video.category} • ${new Date(video.date).toLocaleDateString()}
+                    </p>
+                </div>
+            `;
+        }
+
+        function displayVideos(videos) {
+            const container = document.getElementById('videos-container');
+            container.innerHTML = '';
+
+            videos.forEach(video => {
+                const videoCard = `
+                    <div class="video-card" data-category="${video.category}">
+                        <div class="video-embed">
+                            <iframe
+                                src="https://www.youtube.com/embed/${video.youtubeId}"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                        <div class="video-info">
+                            <span class="video-category">${video.category}</span>
+                            <h3>${video.title}</h3>
+                            <p>${video.description}</p>
+                            <p style="font-size: 0.9rem; color: var(--medium-gray); margin-top: 1rem;">
+                                ${new Date(video.date).toLocaleDateString()}
+                            </p>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += videoCard;
+            });
+        }
+
+        function filterVideos(category) {
+            currentFilter = category;
+
+            // Update button states
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Filter and display
+            if (category === 'all') {
+                displayVideos(allVideos);
+            } else {
+                const filtered = allVideos.filter(v => v.category === category);
+                displayVideos(filtered);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadVideos);
+    </script>
+</body>
+</html>

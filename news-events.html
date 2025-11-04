@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News & Events - AESOP Afghanistan</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .news-card {
+            background: var(--white);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .news-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .news-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        .news-content {
+            padding: 1.5rem;
+        }
+
+        .news-category {
+            display: inline-block;
+            background: var(--bright-green);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .event-card {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid var(--bright-green);
+            transition: transform 0.3s ease;
+        }
+
+        .event-card:hover {
+            transform: translateX(5px);
+        }
+
+        .event-date {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .date-box {
+            background: var(--primary-green);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .date-box .day {
+            font-size: 1.8rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .date-box .month {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .event-type {
+            display: inline-block;
+            background: var(--light-gray);
+            color: var(--primary-green);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <a href="index.html" class="logo">
+                <img src="AESOP+Logo+Lockup.webp" alt="AESOP Afghanistan Logo">
+            </a>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="donors.html">For Donors</a></li>
+                <li><a href="students.html">For Students</a></li>
+                <li><a href="volunteers.html">For Volunteers</a></li>
+                <li><a href="student-work.html">Student Work</a></li>
+                <li><a href="videos.html">Videos</a></li>
+                <li><a href="news-events.html" class="active">News & Events</a></li>
+                <li><a href="merch.html">Merch</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>News & Events</h1>
+            <p>Stay updated with the latest from AESOP Afghanistan</p>
+        </div>
+    </section>
+
+    <!-- Upcoming Events -->
+    <section>
+        <div class="container">
+            <div class="section-header">
+                <h2>Upcoming Events</h2>
+                <p>Mark your calendar for these important dates</p>
+            </div>
+            <div id="events-container">
+                <!-- Events will be loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Latest News -->
+    <section class="alt-bg">
+        <div class="container">
+            <div class="section-header">
+                <h2>Latest News</h2>
+                <p>Recent achievements and updates from our community</p>
+            </div>
+            <div class="grid grid-2" id="news-container">
+                <!-- News will be loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Signup -->
+    <section class="accent-bg">
+        <div class="container text-center">
+            <h2>Stay Informed</h2>
+            <p style="font-size: 1.3rem; max-width: 700px; margin: 2rem auto;">Subscribe to our newsletter to receive updates about student achievements, upcoming events, and program news.</p>
+
+            <div style="max-width: 500px; margin: 2rem auto;">
+                <div class="form-section" style="background: rgba(255,255,255,0.1);">
+                    <h4 style="color: white; margin-bottom: 1rem;">Newsletter Signup</h4>
+                    <input type="email" placeholder="Enter your email" style="margin-bottom: 1rem;">
+                    <button class="btn btn-primary" style="width: 100%;">Subscribe</button>
+                    <p style="font-size: 0.9rem; color: white; opacity: 0.8; margin-top: 1rem;">
+                        We respect your privacy. Unsubscribe anytime.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>About AESOP</h3>
+                    <p>The Afghan Education Student Outreach Project provides free online education to Afghan girls and young women deprived of education.</p>
+                    <p><strong>AESOPAfghanistan.org</strong></p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="donors.html">For Donors</a></li>
+                        <li><a href="students.html">For Students</a></li>
+                        <li><a href="volunteers.html">For Volunteers</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>More</h3>
+                    <ul>
+                        <li><a href="student-work.html">Student Work</a></li>
+                        <li><a href="videos.html">Videos</a></li>
+                        <li><a href="news-events.html">News & Events</a></li>
+                        <li><a href="merch.html">Merch Store</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <p>For inquiries about AESOP:</p>
+                    <p>Visit <strong>AESOPAfghanistan.org</strong></p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 AESOP Afghanistan, Inc. All rights reserved. | Empowering through education.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        async function loadNewsAndEvents() {
+            try {
+                const response = await fetch('data/news-events.json');
+                const data = await response.json();
+
+                // Load Upcoming Events
+                const eventsContainer = document.getElementById('events-container');
+                data.upcomingEvents.forEach(event => {
+                    const eventDate = new Date(event.date);
+                    const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+
+                    const eventCard = `
+                        <div class="event-card" style="margin-bottom: 1.5rem;">
+                            <div class="event-date">
+                                <div class="date-box">
+                                    <div class="day">${eventDate.getDate()}</div>
+                                    <div class="month">${monthNames[eventDate.getMonth()]}</div>
+                                </div>
+                                <div style="flex: 1;">
+                                    <span class="event-type">${event.type}</span>
+                                    <h3 style="margin: 0.5rem 0;">${event.title}</h3>
+                                    <p>${event.description}</p>
+                                    ${event.registrationLink ?
+                                        `<a href="${event.registrationLink}" class="btn btn-primary" style="margin-top: 1rem; display: inline-block; padding: 0.5rem 1.5rem; font-size: 0.9rem;">Learn More</a>`
+                                        : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    eventsContainer.innerHTML += eventCard;
+                });
+
+                // Load News
+                const newsContainer = document.getElementById('news-container');
+                data.news.forEach(article => {
+                    const newsCard = `
+                        <div class="news-card">
+                            <img src="${article.imageUrl}" alt="${article.title}" class="news-image">
+                            <div class="news-content">
+                                <span class="news-category">${article.category}</span>
+                                <h3>${article.title}</h3>
+                                <p style="color: var(--medium-gray); font-size: 0.9rem; margin-bottom: 1rem;">
+                                    ${new Date(article.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                </p>
+                                <p>${article.content}</p>
+                            </div>
+                        </div>
+                    `;
+                    newsContainer.innerHTML += newsCard;
+                });
+            } catch (error) {
+                console.error('Error loading news and events:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadNewsAndEvents);
+    </script>
+</body>
+</html>

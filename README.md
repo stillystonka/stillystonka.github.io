@@ -1,6 +1,6 @@
 # AESOP Afghanistan Website
 
-A comprehensive website for the Afghan Education Student Outreach Project (AESOP), designed to inform donors, attract students, and recruit volunteers.
+A comprehensive website for the Afghan Education Student Outreach Project (AESOP), featuring easy content management, student work showcase, video gallery, news & events, and merch store.
 
 ## 🌟 About AESOP
 
@@ -9,23 +9,70 @@ AESOP provides free, volunteer-taught, online courses to Afghan girls and young 
 - **Donors**: Learn about our impact and contribute financially
 - **Students**: Discover courses and apply to join our programs
 - **Volunteers**: Find teaching and administrative opportunities
+- **Community**: View student work, videos, news, and support through merch
 
 ## 📁 Project Structure
 
 ```
 AESOP-web/
-├── index.html          # Home page with mission, problem, and solution
-├── donors.html         # Donation information and impact metrics
-├── students.html       # Course catalog and student applications
-├── volunteers.html     # Volunteer opportunities and applications
-├── styles.css          # Main stylesheet with lively, educational design
-├── script.js           # JavaScript for interactivity
-└── README.md           # This file
+├── index.html              # Home page with mission, problem, and solution
+├── donors.html             # Donation information and impact metrics
+├── students.html           # Course catalog and student applications
+├── volunteers.html         # Volunteer opportunities and applications
+├── student-work.html       # Student poetry and artwork showcase
+├── videos.html             # YouTube video gallery
+├── news-events.html        # News articles and upcoming events
+├── merch.html              # Merchandise store (Bonfire integration)
+├── admin.html              # Content management interface
+├── styles.css              # Main stylesheet
+├── script.js               # JavaScript for interactivity
+├── data/                   # JSON data files for easy content updates
+│   ├── stats.json          # Site statistics
+│   ├── student-work.json   # Poetry and artwork data
+│   ├── videos.json         # YouTube videos data
+│   └── news-events.json    # News and events data
+├── docs/                   # Documentation
+│   ├── CONTENT-MANAGEMENT.md   # How to update website content
+│   └── MERCH-STORE-SETUP.md    # How to set up Bonfire merch store
+└── README.md               # This file
 ```
+
+## ✨ New Features
+
+### 🎯 Easy Content Management System
+- **Admin Interface** (`admin.html`): User-friendly forms to update content
+- **JSON-Based Data**: Simple data files that anyone can edit
+- **No Database Required**: All content stored in JSON files
+- **Real-Time Updates**: Changes appear immediately on refresh
+
+### 🎨 Student Work Showcase
+- Poetry gallery with author attribution
+- Visual artwork display
+- Featured content highlighting
+- Student submission form integration
+
+### 📹 Video Gallery
+- YouTube video integration
+- Filterable by category
+- Featured video section
+- Direct channel subscription links
+
+### 📰 News & Events
+- Latest news articles with images
+- Upcoming events calendar
+- Newsletter signup
+- Automated date formatting
+
+### 🛍️ Merch Store
+- Bonfire platform integration ready
+- Impact messaging ($ = students supported)
+- Product preview designs
+- Complete setup documentation
 
 ## 🎨 Design Features
 
-- **Vibrant Color Palette**: Blues, teals, oranges, and purples create an encouraging learning atmosphere
+- **Green Color Scheme**: Professional green hues representing growth and education
+- **White Navigation**: Clean, prominent logo display
 - **Responsive Design**: Works beautifully on desktop, tablet, and mobile devices
 - **Accessible**: Clear typography, good contrast, and semantic HTML
 - **Interactive**: Smooth scrolling, fade-in animations, and engaging hover effects

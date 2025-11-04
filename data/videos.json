@@ -1,0 +1,33 @@
+{
+  "videos": [
+    {
+      "id": 1,
+      "title": "AESOP Student Testimonials",
+      "youtubeId": "dQw4w9WgXcQ",
+      "description": "Hear directly from our students about their learning journey with AESOP",
+      "category": "Student Stories",
+      "date": "2024-10-01",
+      "featured": true
+    },
+    {
+      "id": 2,
+      "title": "English Class Highlights - Fall 2024",
+      "youtubeId": "dQw4w9WgXcQ",
+      "description": "A glimpse into our English classes and student progress",
+      "category": "Classes",
+      "date": "2024-09-15",
+      "featured": false
+    },
+    {
+      "id": 3,
+      "title": "Volunteer Teacher Stories",
+      "youtubeId": "dQw4w9WgXcQ",
+      "description": "Meet our dedicated volunteer teachers from around the world",
+      "category": "Volunteers",
+      "date": "2024-08-20",
+      "featured": false
+    }
+  ],
+  "youtubeChannelUrl": "https://www.youtube.com/@AESOPAfghanistan",
+  "lastUpdated": "2024-11-04"
+}

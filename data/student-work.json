@@ -1,0 +1,43 @@
+{
+  "poetry": [
+    {
+      "id": 1,
+      "title": "Hope in the Darkness",
+      "author": "Fatima A.",
+      "date": "2024-10-15",
+      "content": "In the shadows of my room I dream,\nOf books and learning, a distant gleam.\nThough doors are closed, my mind stays free,\nEducation lights the path for me.",
+      "featured": true
+    },
+    {
+      "id": 2,
+      "title": "My Sister's Voice",
+      "author": "Zahra M.",
+      "date": "2024-09-22",
+      "content": "She speaks in whispers through the screen,\nHer English words like bridges unseen.\nConnecting hearts across the miles,\nBringing knowledge, hope, and smiles.",
+      "featured": false
+    }
+  ],
+  "artwork": [
+    {
+      "id": 1,
+      "title": "Freedom to Learn",
+      "artist": "Mariam K.",
+      "date": "2024-10-20",
+      "imageUrl": "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&q=80",
+      "description": "A digital illustration representing the power of online education",
+      "medium": "Digital Art",
+      "featured": true
+    },
+    {
+      "id": 2,
+      "title": "Books and Dreams",
+      "artist": "Layla S.",
+      "date": "2024-09-15",
+      "imageUrl": "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&q=80",
+      "description": "Watercolor painting of books opening doors to possibilities",
+      "medium": "Watercolor",
+      "featured": false
+    }
+  ],
+  "lastUpdated": "2024-11-04"
+}

@@ -1,0 +1,52 @@
+{
+  "news": [
+    {
+      "id": 1,
+      "title": "15 AESOP Students Receive Scholarships Abroad",
+      "date": "2024-10-25",
+      "category": "Achievement",
+      "content": "We're thrilled to announce that 15 of our students have received scholarships to prestigious institutions including Smith College, University of Glasgow, and more. This milestone demonstrates the impact of quality online education.",
+      "imageUrl": "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&q=80",
+      "featured": true
+    },
+    {
+      "id": 2,
+      "title": "Fall 2024 Term Successfully Completed",
+      "date": "2024-10-15",
+      "category": "Programs",
+      "content": "Our Fall 2024 term concluded with over 200 students completing courses in English, Math, Leadership, and more. Congratulations to all our students and volunteer teachers!",
+      "imageUrl": "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800&q=80",
+      "featured": false
+    }
+  ],
+  "upcomingEvents": [
+    {
+      "id": 1,
+      "title": "Spring 2025 Term Registration Opens",
+      "date": "2024-12-15",
+      "endDate": "2025-01-05",
+      "type": "Registration",
+      "description": "Applications for Spring 2025 term will be open. Students can apply for English, Math, STEM, and specialized courses.",
+      "registrationLink": "students.html#application"
+    },
+    {
+      "id": 2,
+      "title": "Volunteer Teacher Orientation",
+      "date": "2024-12-20",
+      "endDate": "2024-12-20",
+      "type": "Training",
+      "description": "New volunteer teachers will receive orientation and training for the Spring 2025 term.",
+      "registrationLink": "volunteers.html#application"
+    },
+    {
+      "id": 3,
+      "title": "Student Art Exhibition - Virtual Gallery",
+      "date": "2025-01-10",
+      "endDate": "2025-01-31",
+      "type": "Celebration",
+      "description": "Showcase of student artwork and poetry from Fall 2024 term. Join us in celebrating our students' creative talents!",
+      "registrationLink": "student-work.html"
+    }
+  ],
+  "lastUpdated": "2024-11-04"
+}
