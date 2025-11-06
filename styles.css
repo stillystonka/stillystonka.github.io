@@ -517,74 +517,54 @@ textarea {
 }
 
 /* Timeline */
-.timeline{
-  /* single source of truth for geometry */
-  --line-x: 18px;          /* spine distance from .timeline's left edge */
-  --line-width: 4px;       /* keep your existing 4px spine */
-  --dot-size: 20px;        /* keep your existing 20px dot */
-  --gutter: 16px;          /* space between dot edge and content */
-
-  position: relative;
-  padding-left: calc(var(--line-x) + var(--dot-size) + var(--gutter));
+.timeline {
+    position: relative;
+    padding-left: 40px;
 }
 
-/* vertical spine uses the same --line-x */
-.timeline::before{
-  content: '';
-  position: absolute;
-  left: var(--line-x);
-  top: 0;
-  bottom: 0;
-  width: var(--line-width);
-  background: linear-gradient(to bottom, var(--primary-green), var(--emerald));
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(to bottom, var(--primary-green), var(--emerald));
 }
 
-/* items don’t need extra left padding anymore */
-.timeline-item{
-  position: relative;
-  margin-bottom: var(--spacing-md);
-  padding-left: 0;
+.timeline-item {
+    position: relative;
+    margin-bottom: var(--spacing-md);
+    padding-left: var(--spacing-md);
 }
 
-/* dot is centered on the spine using the same variables */
-.timeline-item::before{
-  content: '';
-  position: absolute;
-  left: calc(var(--line-x) - (var(--dot-size) / 2) + (var(--line-width) / 2));
-  /* align dot to the top content edge; tweak if you want it on the date/baseline */
-  top: 0.15rem;
-  width: var(--dot-size);
-  height: var(--dot-size);
-  border-radius: 50%;
-  background: var(--bright-green);
-  border: 4px solid var(--white);
-  box-shadow: 0 0 0 2px var(--bright-green);
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -42px;
+    top: 5px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--bright-green);
+    border: 4px solid var(--white);
+    box-shadow: 0 0 0 2px var(--bright-green);
 }
 
-/* keep your existing styling */
-.timeline-item h4{
-  color: var(--primary-green);
-  margin-bottom: var(--spacing-xs);
+.timeline-item h4 {
+    color: var(--primary-green);
+    margin-bottom: var(--spacing-xs);
 }
 
-.timeline-date{
-  display: inline-block;
-  background: var(--seafoam);
-  color: var(--white);
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  margin-bottom: var(--spacing-xs);
-}
-
-/* Responsive: adjust geometry without breaking alignment */
-@media (max-width: 768px){
-  .timeline{
-    --line-x: 14px;      /* pull spine a bit closer on small screens */
-    --dot-size: 18px;
-    --gutter: 12px;
-  }
+.timeline-date {
+    display: inline-block;
+    background: var(--seafoam);
+    color: var(--white);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
 }
 
 /* Course Cards */
