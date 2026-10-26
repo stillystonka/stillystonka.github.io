@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lexicon</title>
+<meta name="description" content="Offline dictionary: Princeton WordNet definitions with pronunciations.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Lexicon">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f3f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#11161c" media="(prefers-color-scheme: dark)">
+<style>
+/* Layout: a one-screen app. Search on top; the entry and the log scroll inside their own boxes, side by side on wide screens, stacked on phones. System fonts only, so nothing needs the network. */
+:root {
+  --bg: #f3f5f7; --surface: #ffffff; --fg: #1b2430; --muted: #5d6b7c; --line: #d8dee6;
+  --accent: #23517a; --accent-soft: #e3ecf5; --warn: #8a5a00; --warn-soft: #fbf1dc; --ok: #2f6b3a; --ok-soft: #e4f1e6;
+  --display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --body: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root {
+  --bg: #11161c; --surface: #18202a; --fg: #e6ebf1; --muted: #98a6b6; --line: #2a3542;
+  --accent: #8ab6df; --accent-soft: #1d2e40; --warn: #e6b45c; --warn-soft: #2e2617; --ok: #8fd19e; --ok-soft: #1b2d20; color-scheme: dark } }
+* , *::before, *::after { box-sizing: border-box; }
+html { height: 100%; padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); background: var(--bg); }
+body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 16px; line-height: 1.5; -webkit-text-size-adjust: 100%; }
+[hidden] { display: none !important; }
+.app { height: 100%; max-width: 1180px; margin: 0 auto; padding-inline: max(16px, env(safe-area-inset-left, 0px)); padding-block: 12px; display: grid; grid-template-rows: auto auto minmax(0, 1fr); grid-template-columns: minmax(0, 1fr); gap: 10px; }
+
+header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+header h1 { font-family: var(--display); font-weight: 700; font-size: 1.5rem; margin: 0; letter-spacing: -0.01em; }
+.pill { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.04em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+header .spacer { flex: 1; }
+button.link { background: none; border: 0; padding: 4px 2px; color: var(--accent); font: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+
+.search { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; }
+form { display: flex; gap: 8px; }
+input { font: inherit; font-size: 16px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--fg); min-width: 0; }
+input#q { flex: 1; font-size: 1.1rem; }
+input:focus-visible, button:focus-visible, a:focus-visible, li:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button.primary { font: inherit; font-weight: 600; padding: 0 18px; border-radius: 8px; border: 0; background: var(--accent); color: var(--surface); cursor: pointer; min-height: 44px; }
+button:disabled { opacity: 0.55; cursor: default; }
+.status { font-size: 0.82rem; color: var(--muted); min-height: 1.25em; }
+.status.err { color: var(--warn); }
+
+.panes { min-height: 0; display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr) minmax(240px, 320px); }
+.pane { min-height: 0; min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; display: flex; flex-direction: column; }
+.scroll { overflow-y: auto; min-height: 0; flex: 1; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+
+#entrybody { padding: 20px 22px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; align-content: start; }
+#entrybody h2 { font-family: var(--display); font-weight: 700; font-size: 2rem; line-height: 1.15; margin: 0; overflow-wrap: anywhere; }
+.pron { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.resp { font-size: 1.2rem; font-weight: 600; letter-spacing: 0.03em; }
+.or { color: var(--muted); font-size: 0.85rem; }
+.ipa { font-size: 0.85rem; color: var(--muted); }
+button.listen { border: 0; background: var(--accent-soft); color: var(--accent); padding: 5px 11px; font: inherit; font-size: 0.8rem; font-weight: 600; border-radius: 999px; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
+button.listen svg { width: 13px; height: 13px; fill: currentColor; }
+.nopron { font-size: 0.85rem; color: var(--muted); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 0.8rem; color: var(--muted); }
+.chip { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+.chip.ai { background: var(--warn-soft); color: var(--warn); }
+.pos { font-family: var(--display); font-style: italic; color: var(--muted); font-size: 1.05rem; margin: 4px 0 2px; }
+ol.senses { margin: 0; padding-left: 1.4em; display: grid; gap: 9px; max-width: 68ch; }
+.ex { color: var(--muted); font-style: italic; }
+.syn { font-size: 0.88rem; color: var(--muted); }
+.syn b { font-weight: 400; color: var(--fg); font-family: var(--mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; margin-right: 6px; }
+.sugg { display: flex; flex-wrap: wrap; gap: 8px; }
+.sugg button { border: 1px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 0.95rem; cursor: pointer; }
+.blank { margin: auto; text-align: center; color: var(--muted); max-width: 36ch; padding: 24px 8px; display: grid; gap: 6px; }
+.blank strong { font-family: var(--display); font-weight: 700; font-size: 1.25rem; color: var(--fg); }
+.notfound a { color: var(--accent); }
+
+#logpane .head { padding: 12px 14px 8px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+#logpane h3 { font-family: var(--mono); font-weight: 400; text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.72rem; color: var(--muted); margin: 0; }
+#syncstate { font-size: 0.78rem; color: var(--muted); }
+ul#log { list-style: none; margin: 0; padding: 0; }
+ul#log li { border-bottom: 1px solid var(--line); padding: 8px 14px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 10px; cursor: pointer; }
+ul#log li:hover .w, ul#log li.on .w { color: var(--accent); }
+ul#log .w { font-family: var(--display); font-weight: 700; font-size: 1rem; overflow-wrap: anywhere; }
+ul#log .t { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); font-variant-numeric: tabular-nums; align-self: center; }
+ul#log .t.q::after { content: " · queued"; color: var(--warn); }
+ul#log .d { grid-column: 1 / -1; color: var(--muted); font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.logempty { color: var(--muted); font-size: 0.85rem; padding: 14px; }
+
+dialog { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--fg); padding: 20px; width: min(520px, calc(100vw - 32px)); }
+dialog::backdrop { background: rgba(10, 15, 20, 0.45); }
+dialog h2 { font-family: var(--display); margin: 0 0 6px; font-size: 1.3rem; }
+dialog p { margin: 6px 0; font-size: 0.92rem; color: var(--muted); }
+dialog .row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+dialog input { flex: 1 1 260px; }
+dialog .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+dialog button.secondary { font: inherit; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line); background: transparent; color: var(--fg); cursor: pointer; }
+.install { font-size: 0.85rem; color: var(--muted); }
+
+@media (max-width: 760px) {
+  .app { padding-block: 8px; gap: 8px; }
+  header h1 { font-size: 1.3rem; }
+  .panes { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) minmax(0, 32%); gap: 8px; }
+  #entrybody { padding: 16px; }
+  #entrybody h2 { font-size: 1.7rem; }
+  #logpane .head { padding: 8px 12px 6px; }
+  ul#log li { padding: 6px 12px; }
+  ul#log .d { display: none; }
+}
+@media (prefers-reduced-motion: no-preference) { .fresh { animation: in .18s ease-out; } @keyframes in { from { transform: translateY(4px); opacity: .6; } } }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Lexicon</h1>
+    <span class="pill" id="offline">Checking…</span>
+    <span class="spacer"></span>
+    <button class="link" id="opensync" type="button">Google Doc sync</button>
+  </header>
+
+  <div class="search">
+    <form id="f" autocomplete="off">
+      <input id="q" type="search" placeholder="Look up a word…" aria-label="Word to look up" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search">
+      <button class="primary" id="go" type="submit">Define</button>
+    </form>
+    <div class="status" id="status" role="status"></div>
+  </div>
+
+  <div class="panes">
+    <article class="pane" aria-live="polite">
+      <div class="scroll" id="entrybody">
+        <div class="blank"><strong>Look up a word</strong><span>Definitions from Princeton WordNet with US pronunciations. Works with no internet once the dictionary is saved.</span><span class="install" id="installhint" hidden></span></div>
+      </div>
+    </article>
+    <section class="pane" id="logpane">
+      <div class="head"><h3 id="logcount">Your log</h3><span id="syncstate"></span></div>
+      <div class="scroll">
+        <ul id="log"></ul>
+        <div class="logempty" id="logempty">Words you look up appear here, newest first.</div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<dialog id="syncdlg">
+  <h2>Google Doc sync</h2>
+  <p>Paste the web app address from your Google Apps Script deployment. Words you look up are added to your Word Lookup Log doc, and your phone and laptop share one log. Lookups made offline are sent when you're back online.</p>
+  <p>Set this once on each device, inside the installed app.</p>
+  <div class="row"><input id="syncurl" type="url" placeholder="https://script.google.com/macros/s/…/exec" aria-label="Sync address" autocapitalize="off" spellcheck="false"></div>
+  <p id="syncmsg"></p>
+  <div class="actions">
+    <button class="secondary" id="syncoff" type="button">Turn off</button>
+    <button class="secondary" id="synccancel" type="button">Close</button>
+    <button class="primary" id="syncsave" type="button">Save and test</button>
+  </div>
+</dialog>
+
+<script>
+const VERSION = "202610261650";
+const MANIFEST = {"_":"d/0.json","a_":"d/1.json","aa":"d/1.json","ab":"d/1.json","ac":"d/1.json","ad":"d/1.json","ae":"d/1.json","af":"d/1.json","ag":"d/1.json","ah":"d/1.json","ai":"d/1.json","aj":"d/1.json","ak":"d/1.json","al":"d/2.json","am":"d/2.json","an":"d/2.json","ao":"d/2.json","ap":"d/3.json","aq":"d/3.json","ar":"d/3.json","as":"d/3.json","at":"d/3.json","au":"d/4.json","av":"d/4.json","aw":"d/4.json","ax":"d/4.json","ay":"d/4.json","az":"d/4.json","b_":"d/5.json","ba":"d/5.json","bb":"d/5.json","bc":"d/5.json","bd":"d/5.json","be":"d/6.json","bf":"d/6.json","bh":"d/6.json","bi":"d/6.json","bj":"d/6.json","bk":"d/6.json","bl":"d/7.json","bm":"d/7.json","bn":"d/7.json","bo":"d/7.json","bp":"d/7.json","br":"d/8.json","bs":"d/8.json","bt":"d/8.json","bu":"d/8.json","bv":"d/8.json","bw":"d/8.json","bx":"d/8.json","by":"d/8.json","bz":"d/8.json","c_":"d/9.json","ca":"d/9.json","cb":"d/9.json","cc":"d/9.json","cd":"d/9.json","ce":"d/10.json","cf":"d/10.json","cg":"d/10.json","ch":"d/10.json","ci":"d/10.json","cj":"d/10.json","cl":"d/11.json","cm":"d/11.json","cn":"d/11.json","co":"d/12.json","cp":"d/13.json","cr":"d/13.json","cs":"d/13.json","ct":"d/13.json","cu":"d/13.json","cv":"d/13.json","cw":"d/13.json","cx":"d/13.json","cy":"d/13.json","cz":"d/13.json","d_":"d/14.json","da":"d/14.json","db":"d/14.json","dc":"d/14.json","dd":"d/14.json","de":"d/15.json","df":"d/15.json","dg":"d/15.json","dh":"d/15.json","di":"d/16.json","dj":"d/16.json","dk":"d/16.json","dl":"d/16.json","dm":"d/16.json","dn":"d/16.json","do":"d/16.json","dp":"d/16.json","dq":"d/16.json","dr":"d/17.json","ds":"d/17.json","dt":"d/17.json","du":"d/17.json","dv":"d/17.json","dw":"d/17.json","dy":"d/17.json","dz":"d/17.json","e_":"d/18.json","ea":"d/18.json","eb":"d/18.json","ec":"d/18.json","ed":"d/18.json","ee":"d/18.json","ef":"d/18.json","eg":"d/18.json","eh":"d/18.json","ei":"d/18.json","ej":"d/18.json","ek":"d/18.json","el":"d/18.json","em":"d/18.json","en":"d/18.json","eo":"d/18.json","ep":"d/18.json","eq":"d/18.json","er":"d/19.json","es":"d/19.json","et":"d/19.json","eu":"d/19.json","ev":"d/19.json","ew":"d/19.json","ex":"d/19.json","ey":"d/19.json","ez":"d/19.json","f_":"d/20.json","fa":"d/20.json","fb":"d/20.json","fc":"d/20.json","fd":"d/20.json","fe":"d/20.json","fh":"d/20.json","fi":"d/21.json","fj":"d/21.json","fl":"d/21.json","fm":"d/21.json","fn":"d/21.json","fo":"d/21.json","fp":"d/21.json","fr":"d/22.json","fs":"d/22.json","ft":"d/22.json","fu":"d/22.json","fw":"d/22.json","fy":"d/22.json","g_":"d/23.json","ga":"d/23.json","gb":"d/23.json","gc":"d/23.json","gd":"d/23.json","ge":"d/24.json","gf":"d/24.json","gg":"d/24.json","gh":"d/24.json","gi":"d/24.json","gj":"d/24.json","gl":"d/25.json","gm":"d/25.json","gn":"d/25.json","go":"d/25.json","gp":"d/25.json","gq":"d/25.json","gr":"d/25.json","gs":"d/25.json","gt":"d/25.json","gu":"d/25.json","gv":"d/25.json","gw":"d/25.json","gy":"d/25.json","gz":"d/25.json","h_":"d/26.json","ha":"d/26.json","hb":"d/26.json","hc":"d/26.json","hd":"d/26.json","he":"d/26.json","hf":"d/26.json","hg":"d/26.json","hh":"d/26.json","hi":"d/27.json","hj":"d/27.json","hl":"d/27.json","hm":"d/27.json","hn":"d/27.json","ho":"d/27.json","hp":"d/27.json","hq":"d/27.json","hr":"d/27.json","hs":"d/27.json","ht":"d/27.json","hu":"d/27.json","hv":"d/27.json","hw":"d/27.json","hy":"d/27.json","hz":"d/27.json","i_":"d/28.json","ia":"d/28.json","ib":"d/28.json","ic":"d/28.json","id":"d/28.json","ie":"d/28.json","if":"d/28.json","ig":"d/28.json","ih":"d/28.json","ii":"d/28.json","ij":"d/28.json","ik":"d/28.json","il":"d/28.json","im":"d/28.json","in":"d/29.json","io":"d/29.json","ip":"d/29.json","iq":"d/29.json","ir":"d/29.json","is":"d/30.json","it":"d/30.json","iu":"d/30.json","iv":"d/30.json","iw":"d/30.json","ix":"d/30.json","iy":"d/30.json","iz":"d/30.json","j_":"d/31.json","ja":"d/31.json","jb":"d/31.json","jd":"d/31.json","je":"d/31.json","jf":"d/31.json","jh":"d/31.json","ji":"d/31.json","jj":"d/31.json","jn":"d/31.json","jo":"d/31.json","jp":"d/31.json","jr":"d/31.json","js":"d/31.json","jt":"d/31.json","ju":"d/31.json","jv":"d/31.json","jw":"d/31.json","jy":"d/31.json","k_":"d/32.json","ka":"d/32.json","kb":"d/32.json","kc":"d/32.json","kd":"d/32.json","ke":"d/32.json","kg":"d/32.json","kh":"d/32.json","ki":"d/32.json","kj":"d/32.json","kk":"d/32.json","kl":"d/32.json","km":"d/32.json","kn":"d/32.json","ko":"d/32.json","kp":"d/32.json","kr":"d/32.json","ks":"d/32.json","kt":"d/32.json","ku":"d/32.json","kv":"d/32.json","kw":"d/32.json","kx":"d/32.json","ky":"d/32.json","l_":"d/33.json","la":"d/33.json","lb":"d/33.json","lc":"d/33.json","ld":"d/33.json","le":"d/33.json","lf":"d/33.json","lg":"d/33.json","lh":"d/33.json","li":"d/34.json","lj":"d/34.json","ll":"d/34.json","lm":"d/34.json","ln":"d/34.json","lo":"d/34.json","lp":"d/34.json","lr":"d/34.json","ls":"d/34.json","lt":"d/34.json","lu":"d/34.json","lv":"d/34.json","lw":"d/34.json","lx":"d/34.json","ly":"d/34.json","m_":"d/35.json","ma":"d/35.json","mb":"d/35.json","mc":"d/35.json","md":"d/35.json","me":"d/36.json","mf":"d/36.json","mg":"d/36.json","mh":"d/36.json","mi":"d/36.json","mj":"d/36.json","mk":"d/36.json","ml":"d/36.json","mm":"d/36.json","mn":"d/36.json","mo":"d/37.json","mp":"d/37.json","mr":"d/37.json","ms":"d/37.json","mt":"d/37.json","mu":"d/37.json","mv":"d/37.json","mw":"d/37.json","mx":"d/37.json","my":"d/37.json","mz":"d/37.json","n_":"d/38.json","na":"d/38.json","nb":"d/38.json","nc":"d/38.json","nd":"d/38.json","ne":"d/38.json","nf":"d/38.json","ng":"d/38.json","nh":"d/38.json","ni":"d/38.json","nj":"d/38.json","nk":"d/38.json","nl":"d/38.json","nm":"d/38.json","nn":"d/38.json","no":"d/38.json","np":"d/38.json","nr":"d/38.json","ns":"d/38.json","nt":"d/38.json","nu":"d/39.json","nv":"d/39.json","nw":"d/39.json","ny":"d/39.json","nz":"d/39.json","o_":"d/40.json","oa":"d/40.json","ob":"d/40.json","oc":"d/40.json","od":"d/40.json","oe":"d/40.json","of":"d/40.json","og":"d/40.json","oh":"d/40.json","oi":"d/40.json","oj":"d/40.json","ok":"d/40.json","ol":"d/40.json","om":"d/40.json","on":"d/40.json","oo":"d/40.json","op":"d/40.json","oq":"d/40.json","or":"d/40.json","os":"d/40.json","ot":"d/40.json","ou":"d/40.json","ov":"d/41.json","ow":"d/41.json","ox":"d/41.json","oy":"d/41.json","oz":"d/41.json","p_":"d/42.json","pa":"d/42.json","pb":"d/42.json","pc":"d/42.json","pd":"d/42.json","pe":"d/43.json","pf":"d/43.json","pg":"d/43.json","ph":"d/43.json","pi":"d/44.json","pj":"d/44.json","pk":"d/44.json","pl":"d/44.json","pm":"d/44.json","pn":"d/44.json","po":"d/45.json","pp":"d/45.json","pr":"d/46.json","ps":"d/46.json","pt":"d/46.json","pu":"d/47.json","pv":"d/47.json","pw":"d/47.json","px":"d/47.json","py":"d/47.json","q_":"d/48.json","qa":"d/48.json","qb":"d/48.json","qc":"d/48.json","qd":"d/48.json","qe":"d/48.json","qh":"d/48.json","qi":"d/48.json","ql":"d/48.json","qm":"d/48.json","qo":"d/48.json","qt":"d/48.json","qu":"d/48.json","qw":"d/48.json","r_":"d/49.json","ra":"d/49.json","rb":"d/49.json","rc":"d/49.json","re":"d/50.json","rf":"d/51.json","rg":"d/51.json","rh":"d/51.json","ri":"d/51.json","rk":"d/51.json","rn":"d/51.json","ro":"d/51.json","rp":"d/51.json","rs":"d/51.json","rt":"d/51.json","ru":"d/51.json","rv":"d/51.json","rw":"d/51.json","ry":"d/51.json","rz":"d/51.json","s_":"d/52.json","sa":"d/52.json","sb":"d/52.json","sc":"d/52.json","sd":"d/52.json","se":"d/53.json","sf":"d/53.json","sg":"d/53.json","sh":"d/54.json","si":"d/54.json","sj":"d/54.json","sk":"d/54.json","sl":"d/55.json","sm":"d/55.json","sn":"d/55.json","so":"d/55.json","sp":"d/56.json","sq":"d/56.json","sr":"d/56.json","ss":"d/56.json","st":"d/57.json","su":"d/58.json","sv":"d/58.json","sw":"d/58.json","sy":"d/58.json","sz":"d/58.json","t_":"d/59.json","ta":"d/59.json","tb":"d/59.json","tc":"d/59.json","td":"d/59.json","te":"d/59.json","th":"d/60.json","ti":"d/60.json","tj":"d/60.json","tk":"d/60.json","tl":"d/60.json","tm":"d/60.json","tn":"d/60.json","to":"d/60.json","tp":"d/60.json","tr":"d/61.json","ts":"d/61.json","tt":"d/61.json","tu":"d/61.json","tv":"d/61.json","tw":"d/61.json","tx":"d/61.json","ty":"d/61.json","tz":"d/61.json","u_":"d/62.json","ua":"d/62.json","ub":"d/62.json","uc":"d/62.json","ud":"d/62.json","ue":"d/62.json","uf":"d/62.json","ug":"d/62.json","uh":"d/62.json","ui":"d/62.json","uj":"d/62.json","uk":"d/62.json","ul":"d/62.json","um":"d/62.json","un":"d/62.json","uo":"d/62.json","up":"d/62.json","ur":"d/62.json","us":"d/62.json","ut":"d/62.json","uu":"d/62.json","uv":"d/62.json","uw":"d/62.json","ux":"d/62.json","uy":"d/62.json","uz":"d/62.json","v_":"d/63.json","va":"d/63.json","vc":"d/63.json","vd":"d/63.json","ve":"d/63.json","vf":"d/63.json","vh":"d/63.json","vi":"d/63.json","vl":"d/63.json","vn":"d/63.json","vo":"d/63.json","vp":"d/63.json","vr":"d/63.json","vs":"d/63.json","vt":"d/63.json","vu":"d/63.json","vw":"d/63.json","vx":"d/63.json","vy":"d/63.json","w_":"d/64.json","wa":"d/64.json","wb":"d/64.json","wc":"d/64.json","we":"d/64.json","wf":"d/64.json","wg":"d/64.json","wh":"d/64.json","wi":"d/65.json","wl":"d/65.json","wm":"d/65.json","wn":"d/65.json","wo":"d/65.json","wp":"d/65.json","wr":"d/65.json","ws":"d/65.json","wt":"d/65.json","wu":"d/65.json","wv":"d/65.json","ww":"d/65.json","wy":"d/65.json","x_":"d/66.json","xa":"d/66.json","xb":"d/66.json","xc":"d/66.json","xe":"d/66.json","xh":"d/66.json","xi":"d/66.json","xl":"d/66.json","xm":"d/66.json","xn":"d/66.json","xo":"d/66.json","xs":"d/66.json","xt":"d/66.json","xu":"d/66.json","xv":"d/66.json","xx":"d/66.json","xy":"d/66.json","y_":"d/67.json","ya":"d/67.json","yb":"d/67.json","yc":"d/67.json","yd":"d/67.json","ye":"d/67.json","yg":"d/67.json","yh":"d/67.json","yi":"d/67.json","yl":"d/67.json","ym":"d/67.json","yn":"d/67.json","yo":"d/67.json","yp":"d/67.json","yq":"d/67.json","yr":"d/67.json","ys":"d/67.json","yt":"d/67.json","yu":"d/67.json","yv":"d/67.json","yw":"d/67.json","yz":"d/67.json","z_":"d/68.json","za":"d/68.json","zb":"d/68.json","zd":"d/68.json","ze":"d/68.json","zh":"d/68.json","zi":"d/68.json","zl":"d/68.json","zm":"d/68.json","zn":"d/68.json","zo":"d/68.json","zr":"d/68.json","zs":"d/68.json","zu":"d/68.json","zv":"d/68.json","zw":"d/68.json","zy":"d/68.json","zz":"d/68.json"};
+const DATA_FILES = [...new Set(Object.values(MANIFEST))];
+const CLAUDE_LEXICON = "https://claude.ai/artifact/SrPj9LZwtY474JVeUyfBM7";
+const POS = { n: "noun", v: "verb", a: "adjective", s: "adjective", r: "adverb" };
+const $ = id => document.getElementById(id);
+const canSpeak = "speechSynthesis" in window && typeof SpeechSynthesisUtterance !== "undefined";
+
+// ---- Plain-English respelling from IPA, e.g. /ɪˈfɛmɝəɫ/ -> ih-FEM-er-uhl (stressed syllable in capitals).
+const RS_V = { "aɪ":"y","aʊ":"ow","eɪ":"ay","oʊ":"oh","əʊ":"oh","ɔɪ":"oy","ɪə":"eer","eə":"air","ʊə":"oor","ɑː":"ah","ɑ":"ah","æ":"a","ʌ":"uh","ɐ":"uh","ə":"uh","ɛ":"e","e":"e","ɪ":"i","ᵻ":"i","ɨ":"i","iː":"ee","i":"ee","u":"oo","uː":"oo","ʊ":"oo","ɔː":"aw","ɔ":"aw","ɒ":"o","o":"oh","ɝ":"ur","ɜː":"ur","ɜ":"ur","ɚ":"er","ɘ":"uh","ɵ":"oh","a":"ah","y":"ee","ø":"ur","œ":"ur" };
+const RS_C = { "tʃ":"ch","dʒ":"j","b":"b","d":"d","f":"f","ɡ":"g","g":"g","h":"h","k":"k","l":"l","ɫ":"l","m":"m","n":"n","ŋ":"ng","p":"p","ɹ":"r","r":"r","ɾ":"t","s":"s","ʃ":"sh","t":"t","θ":"th","ð":"th","v":"v","w":"w","ʍ":"wh","j":"y","z":"z","ʒ":"zh","x":"kh","ç":"h","ʔ":"","l̩":"uhl","n̩":"uhn","m̩":"uhm" };
+const RS_VK = Object.keys(RS_V).sort((a, b) => b.length - a.length);
+const RS_CK = Object.keys(RS_C).sort((a, b) => b.length - a.length);
+const RS_SHORT = new Set(["æ","ɛ","e","ɪ","ʊ","ʌ","ə","ɒ","ɑ","ɐ"]);
+const RS_LIQ = ["ɹ","l","ɫ"], RS_STOPF = ["p","b","t","d","k","ɡ","g","f","θ","ʃ","v"];
+function rsOnset(c) {
+  if (c.length <= 1) return c.length === 0 || c[0] !== "ŋ";
+  if (c.length === 2) {
+    const [a, b] = c;
+    if (RS_LIQ.includes(b)) return RS_STOPF.includes(a) && !((a === "t" || a === "d" || a === "θ") && b !== "ɹ");
+    if (b === "w") return ["t","d","k","ɡ","g","s","θ","ʃ"].includes(a);
+    if (b === "j") return !["j","w","ɹ"].includes(a);
+    if (a === "s") return ["p","t","k","m","n","f"].includes(b);
+    return false;
+  }
+  if (c.length === 3) return c[0] === "s" && ["p","t","k"].includes(c[1]) && ["ɹ","l","ɫ","w","j"].includes(c[2]);
+  return false;
+}
+function respellWord(ipa) {
+  const s = ipa.replace(/[\/\[\]͜͡.]/g, "").replace(/ː(?![\s\S]{0}$)/g, "ː");
+  const toks = [];
+  for (let i = 0; i < s.length;) {
+    const ch = s[i];
+    if (ch === "ˈ" || ch === "ˌ") { toks.push({ m: ch }); i++; continue; }
+    const v = RS_VK.find(k => s.startsWith(k, i));
+    if (v) { toks.push({ v }); i += v.length; continue; }
+    const c = RS_CK.find(k => s.startsWith(k, i));
+    if (c) { toks.push({ c }); i += c.length; continue; }
+    i++; // ignore unknown marks
+  }
+  // Mark which vowel each stress mark belongs to; when a word has several primary marks, only the last stays primary.
+  let pending = 0; const prim = [];
+  for (const t of toks) {
+    if (t.m) { pending = t.m === "ˈ" ? 2 : 1; t.boundary = true; continue; }
+    if (t.v) { t.stress = pending; if (pending === 2) prim.push(t); pending = 0; }
+  }
+  prim.slice(0, -1).forEach(t => t.stress = 1);
+  // Build syllables: each vowel is a nucleus; split consonants between vowels.
+  const syl = []; let cur = { on: [], v: null, co: [], stress: 0 }; let between = [];
+  const flush = () => { if (cur.v) syl.push(cur); };
+  for (const t of toks) {
+    if (t.m) {
+      if (cur.v) { cur.co.push(...between); between = []; flush(); cur = { on: [], v: null, co: [], stress: 0 }; }
+      continue;
+    }
+    if (t.c) { (cur.v ? between : cur.on).push(t.c); continue; }
+    if (!cur.v) { cur.v = t.v; cur.stress = t.stress; continue; }
+    // a new vowel after a previous nucleus: divide `between`
+    // Give the next syllable the longest consonant cluster that can start an English syllable;
+    // a stressed short vowel keeps at least one consonant (FEM-er, not feh-mer).
+    let take = between.length;
+    for (let k = 0; k <= between.length; k++) if (rsOnset(between.slice(k))) { take = k; break; }
+    if (take === 0 && between.length && cur.stress && RS_SHORT.has(cur.v)) take = 1;
+    if (take === 0 && between[0] === "ŋ") take = 1;
+    cur.co.push(...between.slice(0, take)); flush();
+    cur = { on: between.slice(take), v: t.v, co: [], stress: t.stress }; between = [];
+  }
+  if (cur.v) { cur.co.push(...between); flush(); } else if (syl.length) syl[syl.length - 1].co.push(...cur.on, ...between);
+  if (!syl.length) return toks.filter(x => x.c).map(x => RS_C[x.c]).join("");
+  return syl.map(x => {
+    let v = RS_V[x.v];
+    const r = x.co[0] === "ɹ" || x.co[0] === "r";
+    if (r && (x.v === "ɑ" || x.v === "ɑː" || x.v === "a")) v = "ah";
+    else if (r && (x.v === "ɔ" || x.v === "ɔː" || x.v === "o" || x.v === "oʊ")) v = "o";
+    else if (r && (x.v === "ɛ" || x.v === "e" || x.v === "eɪ")) v = "ai";
+    else if (r && (x.v === "ɪ" || x.v === "i" || x.v === "iː")) v = "ee";
+    else if (r && (x.v === "ʊ" || x.v === "u")) v = "oo";
+    else if (r && (x.v === "ə" || x.v === "ʌ")) v = "u";
+    else if (!x.co.length) v = { "ɛ":"eh","e":"eh","ɪ":"ih","æ":"a","ɒ":"ah","i":"ee" }[x.v] || v;
+    if (x.v === "aɪ" && !x.on.length) v = "eye";
+    if ((x.v === "ɝ" || x.v === "ɜ" || x.v === "ɜː") && x.stress !== 2) v = "er";
+    let out = x.on.map(c => RS_C[c]).join("") + v + x.co.map(c => RS_C[c]).join("");
+    return x.stress === 2 ? out.toUpperCase() : out;
+  }).join("-");
+}
+function respell(ipa) {
+  if (!ipa) return "";
+  return String(ipa).replace(/^~/, "").replace(/^\/|\/$/g, "").split(/\s+/).filter(Boolean).map(respellWord).join(" ");
+}
+
+
+// ---------- storage ----------
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } }
+};
+let log = store.get("lexicon.log", []);          // [{word, at, source, ipa, ipaSource, groups, synced}]
+const saveLog = () => store.set("lexicon.log", log);
+
+// ---------- dictionary ----------
+const shardCache = {};
+function prefix(w) {
+  const isA = c => /[a-z]/.test(c || "");
+  if (!isA(w[0])) return "_";
+  return isA(w[1]) ? w.slice(0, 2) : w[0] + "_";
+}
+function shardFor(w) { return MANIFEST[prefix(w)] || null; }
+async function loadShard(file) {
+  if (!shardCache[file]) shardCache[file] = fetch(file).then(r => { if (!r.ok) throw new Error("load"); return r.json(); }).catch(e => { delete shardCache[file]; throw e; });
+  return shardCache[file];
+}
+async function rec(w) { const f = shardFor(w); if (!f) return null; const s = await loadShard(f); return s[w] || null; }
+function candidates(w) {
+  const c = [w, w.replace(/-/g, " "), w.replace(/ /g, "-")];
+  const rules = [["ies","y"],["ves","f"],["ves","fe"],["es",""],["s",""],["ied","y"],["ed",""],["ed","e"],["ing",""],["ing","e"],["ier","y"],["iest","y"],["er",""],["est",""],["er","e"],["est","e"],["ly",""],["ily","y"]];
+  for (const [suf, rep] of rules) if (w.endsWith(suf) && w.length > suf.length + 2) {
+    const stem = w.slice(0, -suf.length) + rep;
+    c.push(stem);
+    if (rep === "" && /([b-df-hj-np-tv-z])\1$/.test(stem)) c.push(stem.slice(0, -1));
+  }
+  return [...new Set(c)];
+}
+async function lookupLocal(raw) {
+  const w = raw.toLowerCase().trim().replace(/\s+/g, " ");
+  const exact = await rec(w);
+  for (const c of candidates(w)) {
+    const r = await rec(c);
+    if (r && r[1]) return { word: c, ipa: r[0] || null, entries: r[1] };
+  }
+  return { word: w, ipa: exact ? exact[0] : null, entries: null };
+}
+async function ipaFor(w) { try { const r = await rec(w.toLowerCase()); return r ? r[0] : null; } catch { return null; } }
+function grouped(entries) {
+  const g = {};
+  for (const e of entries) { const p = POS[e[0]] || e[0]; (g[p] ||= []).push({ def: e[1], ex: e[2] || [], syn: e[3] || [] }); }
+  return g;
+}
+// Close spellings from the same dictionary file, for misspellings.
+function editDistance(a, b, max) {
+  if (Math.abs(a.length - b.length) > max) return max + 1;
+  let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i]; let best = i;
+    for (let j = 1; j <= b.length; j++) {
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      best = Math.min(best, cur[j]);
+    }
+    if (best > max) return max + 1;
+    prev = cur;
+  }
+  return prev[b.length];
+}
+async function suggestions(w) {
+  const files = [...new Set([shardFor(w), shardFor(w[0] + (w[2] || "")), shardFor((w[1] || "") + (w[0] || ""))].filter(Boolean))];
+  const out = [];
+  for (const f of files) {
+    let s; try { s = await loadShard(f); } catch { continue; }
+    for (const [k, v] of Object.entries(s)) {
+      if (!v[1] || k.includes(" ")) continue;
+      const d = editDistance(w, k, 2);
+      if (d <= 2) out.push([d, k]);
+    }
+  }
+  return [...new Set(out.sort((a, b) => a[0] - b[0] || a[1].length - b[1].length).map(x => x[1]))].slice(0, 6);
+}
+
+// ---------- rendering ----------
+function el(tag, cls, text) { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
+function status(t, err) { const s = $("status"); s.textContent = t || ""; s.className = "status" + (err ? " err" : ""); }
+function speak(word) { try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(word); u.lang = "en-US"; u.rate = 0.9; speechSynthesis.speak(u); } catch {} }
+function render(r, note) {
+  const box = $("entrybody"); box.replaceChildren(); box.scrollTop = 0;
+  box.classList.remove("fresh"); void box.offsetWidth; box.classList.add("fresh");
+  box.append(el("h2", null, r.word));
+  const pr = el("div", "pron");
+  if (r.ipa && r.ipa.length) {
+    const ps = r.ipa.slice(0, 3);
+    [...new Set(ps.map(respell).filter(Boolean))].forEach((x, i) => { if (i) pr.append(el("span", "or", "or")); pr.append(el("span", "resp", x)); });
+    pr.append(el("span", "ipa", ps.map(p => String(p).replace(/^~/, "")).join("  ")));
+  } else pr.append(el("span", "nopron", "No pronunciation on file"));
+  if (canSpeak) {
+    const b = el("button", "listen"); b.type = "button"; b.setAttribute("aria-label", "Hear " + r.word);
+    b.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6h3l4-3v10L5 10H2z"/><path d="M11 5.5a3.5 3.5 0 0 1 0 5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>';
+    b.append(document.createTextNode("Listen")); b.onclick = () => speak(r.word); pr.append(b);
+  }
+  box.append(pr);
+  const m = el("div", "meta");
+  m.append(el("span", String(r.source).startsWith("WordNet") ? "chip" : "chip ai", r.source));
+  if (r.ipaSource) m.append(el("span", "chip ai", "Pronunciation by Claude"));
+  else if (String(r.ipa?.[0] || "").startsWith("~")) m.append(el("span", "chip", "Pronunciation: Wiktionary, no stress marks"));
+  if (note) m.append(el("span", null, note));
+  box.append(m);
+  for (const [pos, senses] of Object.entries(r.groups || {})) {
+    const d = el("div"); d.append(el("div", "pos", pos));
+    const ol = el("ol", "senses");
+    for (const s of senses) {
+      const li = el("li"); li.append(document.createTextNode(s.def));
+      for (const x of s.ex || []) li.append(el("div", "ex", "“" + x + "”"));
+      if (s.syn?.length) { const sy = el("div", "syn"); sy.append(el("b", null, "syn"), document.createTextNode(s.syn.join(", "))); li.append(sy); }
+      ol.append(li);
+    }
+    d.append(ol); box.append(d);
+  }
+  for (const li of $("log").children) li.classList.toggle("on", li.dataset.w === r.word);
+}
+function renderNotFound(q, sugg) {
+  const box = $("entrybody"); box.replaceChildren();
+  box.append(el("h2", null, q));
+  const p = el("p", "notfound"); p.append(document.createTextNode("Not in the offline dictionary. "));
+  if (navigator.onLine) { const a = el("a", null, "Ask Claude in the online Lexicon"); a.href = CLAUDE_LEXICON; a.target = "_blank"; a.rel = "noopener"; p.append(a); p.append(document.createTextNode(".")); }
+  box.append(p);
+  if (sugg.length) {
+    box.append(el("div", "pos", "Did you mean"));
+    const s = el("div", "sugg");
+    for (const w of sugg) { const b = el("button", null, w); b.type = "button"; b.onclick = () => { $("q").value = w; define(); }; s.append(b); }
+    box.append(s);
+  }
+}
+function renderLog() {
+  const ul = $("log"); ul.replaceChildren();
+  const items = [...log].sort((a, b) => a.at < b.at ? 1 : -1);
+  $("logempty").hidden = items.length > 0;
+  $("logcount").textContent = items.length ? `Your log · ${items.length}` : "Your log";
+  const cur = $("entrybody").querySelector("h2")?.textContent;
+  for (const it of items) {
+    const first = Object.values(it.groups || {})[0]?.[0]?.def || "";
+    const li = el("li"); li.tabIndex = 0; li.dataset.w = it.word; if (it.word === cur) li.classList.add("on");
+    const t = el("span", "t" + (syncUrl() && !it.synced ? " q" : ""), new Date(it.at).toLocaleDateString(undefined, { month: "short", day: "numeric" }));
+    li.append(el("span", "w", it.word), t, el("span", "d", first));
+    li.onclick = () => openFromLog(it); li.onkeydown = e => { if (e.key === "Enter") openFromLog(it); };
+    ul.append(li);
+  }
+}
+async function openFromLog(it) {
+  if (!it.groups) await hydrate(it);
+  render({ ...it, ipa: it.ipa || await ipaFor(it.word) }, "From your log");
+}
+// Entries pulled from the other device carry no definitions when WordNet has them; fill them in locally.
+async function hydrate(it) {
+  try {
+    const r = await lookupLocal(it.word);
+    if (r.entries) { it.groups = grouped(r.entries); if (!it.ipa) it.ipa = r.ipa; saveLog(); }
+  } catch {}
+}
+
+// ---------- lookups ----------
+async function define(e) {
+  e?.preventDefault();
+  const q = $("q").value.trim();
+  if (!q) return;
+  $("q").blur(); $("go").disabled = true; status("Searching…");
+  try {
+    let local;
+    try { local = await lookupLocal(q); }
+    catch { status(navigator.onLine ? "Couldn't load the dictionary. Try again." : "This part of the dictionary isn't saved on this device yet. Connect once to finish downloading it.", true); return; }
+    if (!local.entries) {
+      status("");
+      renderNotFound(q, await suggestions(q.toLowerCase()).catch(() => []));
+      return;
+    }
+    const r = { word: local.word, ipa: local.ipa, ipaSource: null, groups: grouped(local.entries), source: "WordNet 3.1" };
+    render(r, local.word !== q.toLowerCase() ? `Base form of “${q}”` : "");
+    if (log.some(x => x.word === r.word)) { status("Already in your log."); return; }
+    log.push({ ...r, at: new Date().toISOString(), synced: false }); saveLog(); renderLog();
+    status(syncUrl() ? (navigator.onLine ? "Saved. Adding to your Google Doc…" : "Saved on this device. It goes to your Google Doc when you're back online.") : "Saved on this device.");
+    sync();
+  } finally { $("go").disabled = false; }
+}
+
+// ---------- Google Doc sync (Apps Script web app) ----------
+const syncUrl = () => store.get("lexicon.syncUrl", "");
+const GREYED = "#6b7380";
+function docLines(it) {
+  // Paragraphs of [text, style] runs; the Apps Script turns styles into formatting.
+  const P = [];
+  P.push([[it.word, "w"]]);
+  const ipa = (it.ipa || []).map(p => String(p).replace(/^~/, ""));
+  if (ipa.length) {
+    const runs = [[[...new Set(it.ipa.map(respell).filter(Boolean))].join("  or  "), "r"], ["   " + ipa.join("  "), "s"]];
+    const n = it.ipaSource ? "pronunciation by Claude" : String(it.ipa[0]).startsWith("~") ? "Wiktionary, no stress marks" : "";
+    if (n) runs.push(["  (" + n + ")", "m"]);
+    P.push(runs);
+  }
+  for (const [pos, ss] of Object.entries(it.groups || {})) {
+    P.push([[pos, "p"]]);
+    ss.forEach((s, i) => {
+      P.push([[`${i + 1}. ${s.def}`, "d"]]);
+      if (s.ex?.length) P.push([["      " + s.ex.map(x => "“" + x + "”").join("; "), "e"]]);
+      if (s.syn?.length) P.push([["      Synonyms: " + s.syn.join(", "), "s"]]);
+    });
+  }
+  const d = new Date(it.at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  P.push([[`Looked up ${d} · Source: ${it.source}`, "m"]]);
+  P.push([["", "d"]]);
+  return P;
+}
+let syncing = false, syncAgain = false;
+function setSyncState(t) { $("syncstate").textContent = t; }
+async function sync() {
+  const url = syncUrl();
+  if (!url) { setSyncState(""); return; }
+  if (!navigator.onLine) { const n = log.filter(x => !x.synced).length; setSyncState(n ? `${n} waiting for internet` : "Offline"); return; }
+  if (syncing) { syncAgain = true; return; }
+  syncing = true;
+  try {
+    do {
+      syncAgain = false;
+      const pending = log.filter(x => !x.synced);
+      if (pending.length) {
+        setSyncState("Sending…");
+        const body = { action: "add", entries: pending.map(it => ({ word: it.word, at: it.at, source: it.source, ipa: it.ipa || null, ipaSource: it.ipaSource || null, groups: String(it.source).startsWith("WordNet") ? null : it.groups, lines: docLines(it) })) };
+        const res = await fetch(url, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) });
+        const j = await res.json();
+        if (!j.ok) throw new Error(j.error || "The sync script refused the request");
+        const done = new Set(j.added || []);
+        for (const it of log) if (done.has(it.word)) it.synced = true;
+        saveLog();
+      }
+      // Pull words logged on the other device.
+      const res2 = await fetch(url + (url.includes("?") ? "&" : "?") + "action=list");
+      const j2 = await res2.json();
+      if (j2.ok && Array.isArray(j2.entries)) {
+        const have = new Set(log.map(x => x.word));
+        let added = 0;
+        for (const e of j2.entries) if (e && e.word && !have.has(e.word)) {
+          log.push({ word: e.word, at: e.at, source: e.source || "WordNet 3.1", ipa: e.ipa || null, ipaSource: e.ipaSource || null, groups: e.groups || null, synced: true }); added++;
+        }
+        const remote = new Set(j2.entries.map(e => e.word));
+        for (const it of log) if (remote.has(it.word)) it.synced = true;
+        if (added) { saveLog(); for (const it of log) if (!it.groups) await hydrate(it); }
+      }
+    } while (syncAgain);
+    saveLog(); renderLog();
+    setSyncState("Synced with Google Doc");
+    if (/Adding to your Google Doc/.test($("status").textContent)) status("Saved to your log and Google Doc.");
+  } catch (err) {
+    setSyncState("Sync failed. Will retry");
+    if (/Adding to your Google Doc/.test($("status").textContent)) status("Saved on this device. The Google Doc didn't update; it will retry automatically.", true);
+  } finally { syncing = false; }
+}
+
+// ---------- offline: service worker + full dictionary download ----------
+function setOffline(t, cls) { const p = $("offline"); p.textContent = t; p.className = "pill" + (cls ? " " + cls : ""); }
+async function saveDictionary() {
+  if (!("caches" in window) || !navigator.serviceWorker) { setOffline("Online only", "warn"); return; }
+  try { await navigator.storage?.persist?.(); } catch {}
+  const cache = await caches.open("lexicon-data-v1");
+  const missing = [];
+  for (const f of DATA_FILES) if (!(await cache.match(f))) missing.push(f);
+  if (!missing.length) { setOffline("Works offline", "ok"); return; }
+  if (!navigator.onLine) { setOffline(`Offline · ${DATA_FILES.length - missing.length}/${DATA_FILES.length} saved`, "warn"); return; }
+  let done = DATA_FILES.length - missing.length;
+  setOffline(`Saving dictionary ${Math.round(done / DATA_FILES.length * 100)}%`);
+  let i = 0;
+  const worker = async () => {
+    while (i < missing.length) {
+      const f = missing[i++];
+      try { await cache.add(f); done++; setOffline(`Saving dictionary ${Math.round(done / DATA_FILES.length * 100)}%`); } catch {}
+    }
+  };
+  await Promise.all([worker(), worker(), worker()]);
+  setOffline(done === DATA_FILES.length ? "Works offline" : `Saved ${done}/${DATA_FILES.length}. Reopen online to finish`, done === DATA_FILES.length ? "ok" : "warn");
+}
+function installHint() {
+  const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+  if (standalone) return;
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const h = $("installhint"); h.hidden = false;
+  h.textContent = ios ? "On iPhone: tap Share, then Add to Home Screen, and open Lexicon from there once while online."
+    : "To install: use your browser's Install app option (Chrome or Edge address bar), or in Safari choose File, then Add to Dock.";
+}
+
+// ---------- sync settings dialog ----------
+$("opensync").onclick = () => { $("syncurl").value = syncUrl(); $("syncmsg").textContent = syncUrl() ? "Sync is on." : "Sync is off."; $("syncdlg").showModal(); };
+$("synccancel").onclick = () => $("syncdlg").close();
+$("syncoff").onclick = () => { store.set("lexicon.syncUrl", ""); $("syncmsg").textContent = "Sync is off."; setSyncState(""); renderLog(); };
+$("syncsave").onclick = async () => {
+  const u = $("syncurl").value.trim();
+  if (!/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(u)) { $("syncmsg").textContent = "That doesn't look like an Apps Script web app address. It should start with https://script.google.com/macros/s/ and end with /exec."; return; }
+  $("syncmsg").textContent = "Testing…";
+  try {
+    const j = await (await fetch(u + "?action=ping")).json();
+    if (!j.ok) throw new Error();
+    store.set("lexicon.syncUrl", u);
+    $("syncmsg").textContent = "Connected. Syncing your log now.";
+    renderLog(); sync();
+  } catch { $("syncmsg").textContent = navigator.onLine ? "Couldn't reach the script. Check that the deployment's access is set to Anyone, then try again." : "You're offline. Connect to the internet to test the address."; }
+};
+
+// ---------- start ----------
+$("f").addEventListener("submit", define);
+addEventListener("online", () => { saveDictionary(); sync(); });
+addEventListener("offline", () => { saveDictionary(); sync(); });
+document.addEventListener("visibilitychange", () => { if (!document.hidden) sync(); });
+renderLog(); installHint();
+if (navigator.serviceWorker) navigator.serviceWorker.register("sw.js").then(() => navigator.serviceWorker.ready).then(saveDictionary).catch(() => setOffline("Online only", "warn"));
+else setOffline("Online only", "warn");
+sync();
+</script>
+</body>
+</html>
